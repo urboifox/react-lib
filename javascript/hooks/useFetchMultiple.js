@@ -37,9 +37,13 @@
  */
 
 import { useState, useEffect } from 'react';
-import axios, { isCancel } from 'axios';
+import axios, { AxiosError, AxiosResponse, isCancel } from 'axios';
 
-function useFetchMultiple(urls, deps = [], paramsList = []) {
+function useFetchMultiple(
+  urls,
+  deps = [],
+  paramsList = [],
+) {
   const [data, setData] = useState([]);
   const [errors, setErrors] = useState([]);
   const [error, setError] = useState("");
@@ -51,37 +55,39 @@ function useFetchMultiple(urls, deps = [], paramsList = []) {
     const controllers = urls.map(() => new AbortController());
     const fetchData = async () => {
       try {
-        const requests = urls.map((url, index) =>
-          axios.get(url, {
-            params: paramsList[index] || {},
-            signal: controllers[index].signal,
-          }).then(response => {
-            setData(prevData => {
-              const newData = [...prevData];
-              newData[index] = response.data;
-              return newData;
-            });
-            setResponses(prevResponses => {
-              const newResponses = [...prevResponses];
-              newResponses[index] = response;
-              return newResponses;
-            });
-          }).catch(error => {
-            setErrors(prev => {
-              const newErrors = [...prev];
-              newErrors[index] = error.message || 'Something went wrong';
-              return newErrors;
-            });
-          }).finally(() => {
-            setLoadingIndex((prev) => {
-              const newLoadingIndex = [...prev];
-              newLoadingIndex[index] = false;
-              return newLoadingIndex;
-            });
-          })
+        const requests = urls.map(
+          (url, index) =>
+            axios.get(url, {
+              params: paramsList[index] || {},
+              signal: controllers[index].signal,
+            })
         );
 
-        await Promise.allSettled(requests);
+        await Promise.allSettled(requests)
+          .then((responses) => {
+            responses.forEach((response, index) => {
+              if (response.status === "fulfilled") {
+                setData((prevData) => {
+                  const newData = [...prevData];
+                  newData[index] = response.value.data;
+                  return newData;
+                });
+                setResponses((prevResponses) => {
+                  const newResponses = [...prevResponses];
+                  newResponses[index] = response.value;
+                  return newResponses;
+                });
+              }
+
+              if (response.status === 'rejected' && response.reason instanceof AxiosError) {
+                setLoadingIndex((prev) => {
+                  const newLoadingIndex = [...prev];
+                  newLoadingIndex[index] = false;
+                  return newLoadingIndex;
+                });
+              }
+            });
+          })
 
       } catch (err) {
         if (isCancel(err)) return;
@@ -92,14 +98,15 @@ function useFetchMultiple(urls, deps = [], paramsList = []) {
     fetchData();
 
     return () => {
-      controllers.forEach(controller => controller.abort());
+      controllers.forEach((controller) => controller.abort());
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retries, ...deps]);
 
   useEffect(() => {
     data.map((d, i) => {
       if (d) {
-        setLoadingIndex(prev => {
+        setLoadingIndex((prev) => {
           const newLoadingIndex = [...prev];
           newLoadingIndex[i] = false;
           return newLoadingIndex;
@@ -109,7 +116,7 @@ function useFetchMultiple(urls, deps = [], paramsList = []) {
   }, [data]);
 
   function refetch() {
-    setRetries(prev => prev + 1);
+    setRetries((prev) => prev + 1);
   }
 
   function refetchIndex(index) {
@@ -122,22 +129,22 @@ function useFetchMultiple(urls, deps = [], paramsList = []) {
     axios.get(urls[index], {
       params: paramsList[index]
     })
-    .then(res => {
-      setData(prevData => {
+    .then((res) => {
+      setData((prevData) => {
         const newData = [...prevData];
         newData[index] = res.data;
         return newData;
       });
-      setResponses(prevResponses => {
+      setResponses((prevResponses) => {
         const newResponses = [...prevResponses];
         newResponses[index] = res;
         return newResponses;
       });
     })
-    .catch(err => {
-      setErrors(prev => {
+    .catch((err) => {
+      setErrors((prev) => {
         const newErrors = [...prev];
-        newErrors[index] = err.response.data.title || 'Something went wrong';
+        newErrors[index] = err?.response?.data?.title || 'Something went wrong';
         return newErrors;
       });
     }).finally(() => {
@@ -153,3 +160,4 @@ function useFetchMultiple(urls, deps = [], paramsList = []) {
 }
 
 export default useFetchMultiple;
+

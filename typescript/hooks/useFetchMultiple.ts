@@ -57,7 +57,6 @@ function useFetchMultiple<T extends any[]>(
   deps: any[] = [],
   paramsList: object[] = [],
 ): UseFetchMultipleResponse<T> {
-  // State hooks to manage the data, errors, and loading states
   const [data, setData] = useState<T>([] as unknown as T);
   const [errors, setErrors] = useState<string[]>([]);
   const [error, setError] = useState<string>("");
@@ -65,49 +64,45 @@ function useFetchMultiple<T extends any[]>(
   const [loadingIndex, setLoadingIndex] = useState<boolean[]>(Array(urls.length).fill(true));
   const [retries, setRetries] = useState(0);
 
-  // Effect hook to fetch data on mount and when dependencies change
   useEffect(() => {
     const controllers = urls.map(() => new AbortController());
     const fetchData = async () => {
       try {
-        // Map over URLs to fetch data concurrently
-        const requests = urls.map((url, index) =>
-          axios.get(url, {
-            params: paramsList[index] || {},
-            signal: controllers[index].signal,
-          }).then(response => {
-            // Update data and responses state on successful fetch
-            setData((prevData) => {
-              const newData = [...prevData];
-              newData[index] = response.data;
-              return newData as T;
-            });
-            setResponses((prevResponses) => {
-              const newResponses = [...prevResponses];
-              newResponses[index] = response;
-              return newResponses;
-            });
-          }).catch(error => {
-            // Handle errors for each request individually
-            setErrors((prev) => {
-              const newErrors = [...prev];
-              newErrors[index] = error.message || 'Something went wrong';
-              return newErrors;
-            });
-          }).finally(() => {
-            setLoadingIndex((prev) => {
-              const newLoadingIndex = [...prev];
-              newLoadingIndex[index] = false;
-              return newLoadingIndex;
-            });
-          })
+        const requests = urls.map(
+          (url, index) =>
+            axios.get(url, {
+              params: paramsList[index] || {},
+              signal: controllers[index].signal,
+            })
         );
 
-        // Send all requests in parallel and wait for all to settle
-        await Promise.allSettled(requests);
+        await Promise.allSettled(requests)
+          .then((responses) => {
+            responses.forEach((response, index) => {
+              if (response.status === "fulfilled") {
+                setData((prevData) => {
+                  const newData = [...prevData];
+                  newData[index] = response.value.data;
+                  return newData as T;
+                });
+                setResponses((prevResponses) => {
+                  const newResponses = [...prevResponses];
+                  newResponses[index] = response.value;
+                  return newResponses;
+                });
+              }
+
+              if (response.status === 'rejected' && response.reason instanceof AxiosError) {
+                setLoadingIndex((prev) => {
+                  const newLoadingIndex = [...prev];
+                  newLoadingIndex[index] = false;
+                  return newLoadingIndex;
+                });
+              }
+            });
+          })
 
       } catch (err) {
-        // Handle cancellation and other errors
         if (isCancel(err)) return;
         setError((err as AxiosError).message || 'Something went wrong');
       }
@@ -115,14 +110,12 @@ function useFetchMultiple<T extends any[]>(
 
     fetchData();
 
-    // Cleanup function to abort ongoing requests
     return () => {
       controllers.forEach((controller) => controller.abort());
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retries, ...deps]);
 
-  // Effect hook to update loading states based on data availability
   useEffect(() => {
     data.map((d, i) => {
       if (d) {
@@ -135,12 +128,10 @@ function useFetchMultiple<T extends any[]>(
     });
   }, [data]);
 
-  // Function to trigger a refetch of all data
   function refetch() {
     setRetries((prev) => prev + 1);
   }
 
-  // Function to refetch data at a specific index
   function refetchIndex(index: number) {
     setLoadingIndex((prev) => {
       const newLoadingIndex = [...prev];
@@ -152,7 +143,6 @@ function useFetchMultiple<T extends any[]>(
       params: paramsList[index]
     })
     .then((res) => {
-      // Update data and responses state on successful fetch
       setData((prevData) => {
         const newData = [...prevData];
         newData[index] = res.data;
@@ -165,7 +155,6 @@ function useFetchMultiple<T extends any[]>(
       });
     })
     .catch((err) => {
-      // Handle errors for the specific request
       setErrors((prev) => {
         const newErrors = [...prev];
         newErrors[index] = err?.response?.data?.title || 'Something went wrong';
