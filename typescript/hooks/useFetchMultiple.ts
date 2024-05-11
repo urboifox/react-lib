@@ -94,6 +94,12 @@ function useFetchMultiple<T extends any[]>(
               newErrors[index] = error.message || 'Something went wrong';
               return newErrors;
             });
+          }).finally(() => {
+            setLoadingIndex((prev) => {
+              const newLoadingIndex = [...prev];
+              newLoadingIndex[index] = false;
+              return newLoadingIndex;
+            });
           })
         );
 
@@ -136,6 +142,12 @@ function useFetchMultiple<T extends any[]>(
 
   // Function to refetch data at a specific index
   function refetchIndex(index: number) {
+    setLoadingIndex((prev) => {
+      const newLoadingIndex = [...prev];
+      newLoadingIndex[index] = true;
+      return newLoadingIndex;
+    });
+
     axios.get(urls[index], {
       params: paramsList[index]
     })
@@ -158,6 +170,12 @@ function useFetchMultiple<T extends any[]>(
         const newErrors = [...prev];
         newErrors[index] = err?.response?.data?.title || 'Something went wrong';
         return newErrors;
+      });
+    }).finally(() => {
+      setLoadingIndex((prev) => {
+        const newLoadingIndex = [...prev];
+        newLoadingIndex[index] = false;
+        return newLoadingIndex;
       });
     });
   }

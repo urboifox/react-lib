@@ -72,6 +72,12 @@ function useFetchMultiple(urls, deps = [], paramsList = []) {
               newErrors[index] = error.message || 'Something went wrong';
               return newErrors;
             });
+          }).finally(() => {
+            setLoadingIndex((prev) => {
+              const newLoadingIndex = [...prev];
+              newLoadingIndex[index] = false;
+              return newLoadingIndex;
+            });
           })
         );
 
@@ -107,6 +113,12 @@ function useFetchMultiple(urls, deps = [], paramsList = []) {
   }
 
   function refetchIndex(index) {
+    setLoadingIndex((prev) => {
+      const newLoadingIndex = [...prev];
+      newLoadingIndex[index] = true;
+      return newLoadingIndex;
+    });
+
     axios.get(urls[index], {
       params: paramsList[index]
     })
@@ -127,6 +139,12 @@ function useFetchMultiple(urls, deps = [], paramsList = []) {
         const newErrors = [...prev];
         newErrors[index] = err.response.data.title || 'Something went wrong';
         return newErrors;
+      });
+    }).finally(() => {
+      setLoadingIndex((prev) => {
+        const newLoadingIndex = [...prev];
+        newLoadingIndex[index] = false;
+        return newLoadingIndex;
       });
     });
   }
