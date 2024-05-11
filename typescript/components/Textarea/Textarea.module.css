@@ -1,0 +1,69 @@
+.input {
+  position: relative;
+}
+.input textarea {
+    resize: vertical;
+    /* textarea styles */
+}
+.input textarea.error_input {
+    /* error textarea styles */
+}
+.input textarea:focus {
+    /* focus textarea styles */
+}
+.input .counter {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  color: #333333;
+}
+.input .max {
+    /* max length textarea styles */
+}
+
+.required {
+  position: relative;
+}
+.required::after {
+  content: "*";
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  font-size: 1rem;
+  color: #f44336;
+}
+
+.wrapper {
+  position: relative;
+  /* wrapper styles */
+}
+
+.icon {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 12px;
+  height: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* icon styles */
+}
+
+.label {
+  color: #222222;
+  font-weight: 600;
+  /* label styles */
+}
+
+.error {
+  color: #f44336;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 0.3rem;
+  /* error text styles */
+}
+

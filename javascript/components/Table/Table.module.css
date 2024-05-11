@@ -1,0 +1,32 @@
+.container {
+  overflow-x: scroll;
+}
+.container .table {
+  min-width: 1000px;
+  width: 100%;
+  border-spacing: 0;
+  font-size: 15px;
+  table-layout: fixed;
+}
+.container .table td {
+    /* cell styles */
+}
+.container .table thead td {
+  font-weight: bold;
+  /* header styles */
+}
+.container .table tbody td {
+    /* body cells styles */
+}
+.container .table tbody tr:last-child td {
+    /* last row styles */
+}
+.container .table tbody tr.loading {
+  /* loading styles */
+}
+@media (min-width: 640px) {
+  .container .table tbody tr:hover td {
+    /* hover styles */
+  }
+}
+

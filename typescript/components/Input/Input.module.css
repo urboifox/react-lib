@@ -1,0 +1,52 @@
+.input {
+  position: relative;
+  /* main input styles */
+}
+.input input {
+  /* styles for input element within .input */
+}
+.input input.error_input {
+  /* styles for error state of input */
+}
+.input input:focus {
+  /* styles for focus state of input */
+}
+
+.required {
+  position: relative;
+}
+.required::after {
+  content: "*";
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  font-size: 1rem;
+  color: #f44336;
+}
+
+.wrapper {
+  position: relative;
+  /* wrapper styles */
+}
+
+.icon {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 12px;
+  height: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  /* label styles */
+}
+
+.error {
+  /* error message styles */
+}
+
