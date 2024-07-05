@@ -1,4 +1,4 @@
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname, useSearchParams, useRouter } from "next/navigation"
 import { useCallback } from "react"
 
 /**
@@ -10,6 +10,7 @@ import { useCallback } from "react"
 export default function useQueryString() {
     const searchParams = useSearchParams();
     const pathname = usePathname();
+    const router = useRouter();
 
     /**
      * Set or update query parameters.
@@ -66,5 +67,5 @@ export default function useQueryString() {
         [searchParams]
     )
 
-    return { createQueryString, getQueryString, removeQueryString, pathname }
+    return { createQueryString, getQueryString, removeQueryString, pathname, router }
 }
