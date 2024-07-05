@@ -19,7 +19,7 @@ export default function useQueryString() {
      * @param {string} [value] - The value to set for the query parameter if the first argument is a string.
      * @returns {string} - The updated query string.
      */
-    const setQueryString = useCallback(
+    const createQueryString = useCallback(
         (entry: { [key: string]: any } | string, value?: string) => {
             const params = new URLSearchParams(searchParams.toString());
 
@@ -66,5 +66,5 @@ export default function useQueryString() {
         [searchParams]
     )
 
-    return { setQueryString, getQueryString, removeQueryString, pathname }
+    return { createQueryString, getQueryString, removeQueryString, pathname }
 }
