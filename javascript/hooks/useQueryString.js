@@ -1,4 +1,4 @@
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 /**
@@ -10,6 +10,7 @@ import { useCallback } from "react";
 export default function useQueryString() {
     const searchParams = useSearchParams();
     const pathname = usePathname();
+    const router = useRouter();
 
     /**
      * Set or update query parameters.
@@ -19,7 +20,7 @@ export default function useQueryString() {
      * @param {string} [value] - The value to set for the query parameter if the first argument is a string.
      * @returns {string} - The updated query string.
      */
-    const setQueryString = useCallback(
+    const createQueryString = useCallback(
         (entry, value) => {
             const params = new URLSearchParams(searchParams.toString());
 
@@ -66,5 +67,5 @@ export default function useQueryString() {
         [searchParams]
     );
 
-    return { setQueryString, getQueryString, removeQueryString, pathname };
+    return { createQueryString, getQueryString, removeQueryString, pathname, router };
 }

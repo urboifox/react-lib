@@ -59,8 +59,8 @@ function useFetch(url, deps = [], params = {}) {
           })
           .catch((err) => {
             // if the request is cancelled, don't set the error
-            if (!isCancel(err)) return;
-            setError(err?.message || "Something went wrong");
+            if (isCancel(err)) return;
+            setError(err['message'] || "Something went wrong");
             setIsLoading(false);
             setResponse(err);
           })
